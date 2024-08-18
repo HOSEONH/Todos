@@ -4,7 +4,7 @@ import localFont from "next/font/local";
 import Header from "@/components/Header";
 
 // NanumSquare 폰트 설정
-export const nanumSquare = localFont({
+const nanumSquare = localFont({
   src: [
     {
       path: "../fonts/NanumSquareR.ttf",
