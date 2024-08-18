@@ -5,6 +5,8 @@ interface CheckListDetailProps {
   iconSize?: number;
   isChecked: boolean;
   onChange: (checked: boolean) => void;
+  text: string; // 투두 항목의 텍스트를 받을 prop 추가
+
   type?: "button" | "submit" | "checkbox";
   isDisabled?: boolean;
 }
@@ -13,6 +15,7 @@ export default function CheckListDetail({
   iconSize = 32,
   isChecked,
   onChange,
+  text,
   type = "checkbox",
   isDisabled = false,
 }: CheckListDetailProps) {
@@ -42,7 +45,7 @@ export default function CheckListDetail({
         ) : (
           <CheckboxDefaultIcon width={iconSize} height={iconSize} />
         )}
-        <p className="text-slate-900 text-2xl underline">사용자가 입력하기</p>
+        <p className="text-slate-900 text-2xl underline">{text}</p>
       </label>
     </div>
   );

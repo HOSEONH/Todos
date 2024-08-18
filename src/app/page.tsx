@@ -1,9 +1,11 @@
 import TodoContainer from "@/containers/TodoContainer";
 
 export default function Home() {
+  const tenantId = "defaultUser"; // 고정된 tenantId 설정
+
   return (
-    <>
-      <TodoContainer />
-    </>
+    <div>
+      <TodoContainer tenantId={tenantId} />
+    </div>
   );
 }

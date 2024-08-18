@@ -41,7 +41,7 @@ export default function RootLayout({
       <head>
       <link rel="icon" href="/images/favicon.svg" type="image/svg+xml" />
       </head>
-      <body className={`${nanumSquare.className}  mx-auto overflow-hidden bg-gray-50`}>
+      <body className={`${nanumSquare.className} mx-auto overflow-hidden bg-gray-50`}>
         <Header />
         {children}
       </body>

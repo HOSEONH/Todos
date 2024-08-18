@@ -1,59 +1,129 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AddLargeActive from "@/components/AddLargeActive";
 import Search from "@/components/Search";
 import Image from "next/image";
 import CheckList from "@/components/CheckList";
 
 interface Todo {
-  text: string;
-  isChecked: boolean;
-  itemId: string;
+  id: number; // 항목의 고유 ID (서버에서 생성된 ID)
+  name: string; // 할 일의 이름
+  isCompleted: boolean; // 완료 여부
 }
 
-export default function TodoContainer() {
-  const [activeTodos, setActiveTodos] = useState<Todo[]>([]);
-  const [completedTodos, setCompletedTodos] = useState<Todo[]>([]);
+interface TodoContainerProps {
+  tenantId: string; // Home 컴포넌트에서 전달받는 tenantId
+}
+
+export default function TodoContainer({ tenantId }: TodoContainerProps) {
+  const [todos, setTodos] = useState<Todo[]>([]);
   const [inputValue, setInputValue] = useState<string>("");
 
+  // 할 일 목록을 서버에서 가져옴
+  useEffect(() => {
+    console.log("Fetching todos for tenantId:", tenantId);
+    fetch(
+      `https://assignment-todolist-api.vercel.app/api/${encodeURIComponent(
+        tenantId
+      )}/items`
+    )
+      .then((response) => {
+        console.log("API Response status:", response.status);
+        return response.json();
+      })
+      .then((data) => {
+        console.log("API Response data:", data);
+        setTodos(data); 
+      })
+      .catch((error) => {
+        console.error("API Error:", error);
+      });
+  }, [tenantId]);
+
+  // 새로운 할 일 항목을 추가
   const handleAddTodo = () => {
     if (inputValue.trim() !== "") {
-      const newTodo: Todo = {
-        text: inputValue.trim(),
-        isChecked: false,
-        itemId: Date.now().toString(), // 고유한 itemId 생성
+      const newTodo = {
+        name: inputValue.trim(), // 'name' 필드에 입력된 할 일 텍스트를 전달
       };
-      setActiveTodos([...activeTodos, newTodo]);
-      setInputValue("");
+      console.log("Adding new todo:", newTodo);
+
+      // API를 통해 새로운 할 일 항목 추가
+      fetch(
+        `https://assignment-todolist-api.vercel.app/api/${encodeURIComponent(
+          tenantId
+        )}/items`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newTodo),
+        }
+      )
+        .then((response) =>
+          response.json()
+        )
+
+        .then((data) => {
+          console.log("Todo added successfully:", data);
+          setTodos([...todos, data]); // 서버에서 받은 새 투두 데이터를 추가
+          setInputValue(""); // 입력 필드 초기화
+        })
+        .catch((error) => {
+          console.error("Failed to add todo:", error.message);
+        });
     }
   };
 
-  const handleInputChange = (value: string) => {
-    setInputValue(value);
-  };
+  // 할 일 항목의 상태를 토글
+  const handleToggleTodo = (id: number) => {
+    const todoIndex = todos.findIndex((todo) => todo.id === id);
+    if (todoIndex !== -1) {
+      const updatedTodo = {
+        isCompleted: !todos[todoIndex].isCompleted, // 상태 토글
+      };
+      console.log("Toggling todo:", updatedTodo);
 
-  const handleToggleTodo = (index: number) => {
-    const todo = activeTodos[index];
-    const updatedActiveTodos = activeTodos.filter((_, i) => i !== index); // 현재 항목을 제외한 나머지를 유지
-    todo.isChecked = true;
-    setActiveTodos(updatedActiveTodos); // 남은 todo 리스트 업데이트
-    setCompletedTodos([...completedTodos, todo]); // 완료된 리스트로 이동
-  };
+      const requestUrl = `https://assignment-todolist-api.vercel.app/api/${encodeURIComponent(
+        tenantId
+      )}/items/${id}`;
+      console.log("PATCH request to:", requestUrl); // 요청 URL 확인
 
-  const handleToggleCompletedTodo = (index: number) => {
-    const todo = completedTodos[index];
-    const updatedCompletedTodos = completedTodos.filter((_, i) => i !== index); // 현재 항목을 제외한 나머지를 유지
-    todo.isChecked = false;
-    setCompletedTodos(updatedCompletedTodos); // 완료된 리스트에서 항목 제거
-    setActiveTodos([...activeTodos, todo]); // 다시 todo 리스트로 이동
+      fetch(requestUrl, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedTodo),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            return response.json().then((data) => {
+              throw new Error(
+                `Failed to update todo: ${data.message || response.statusText}`
+              );
+            });
+          }
+          const updatedTodos = [...todos];
+          updatedTodos[todoIndex] = {
+            ...todos[todoIndex],
+            isCompleted: updatedTodo.isCompleted,
+          };
+          setTodos(updatedTodos); // 상태 업데이트
+        })
+        .catch((error) => {
+          console.error("Failed to toggle todo:", error.message);
+        });
+    }
   };
 
   return (
     <>
       <div className="flex flex-col items-center mt-6 px-6">
         <div className="flex w-full justify-center gap-[23px]">
-          <Search onSubmit={handleInputChange} value={inputValue} />
+          <Search onSubmit={setInputValue} value={inputValue} />
           <AddLargeActive onClick={handleAddTodo} />
         </div>
 
@@ -68,7 +138,7 @@ export default function TodoContainer() {
                 height={36}
               />
               <div className="flex flex-col items-center text-center">
-                {activeTodos.length === 0 ? (
+                {todos.filter((todo) => !todo.isCompleted).length === 0 ? (
                   <>
                     <div className="relative w-[120px] h-[120px] mt-16 mobile:w-[240px] mobile:h-[240px]">
                       <Image
@@ -87,16 +157,19 @@ export default function TodoContainer() {
                   </>
                 ) : (
                   <ul className="flex flex-col gap-4 mt-4 justify-start w-full">
-                    {activeTodos.map((todo, index) => (
-                      <CheckList
-                        key={index}
-                        iconSize={32}
-                        isChecked={todo.isChecked}
-                        onChange={() => handleToggleTodo(index)}
-                        text={todo.text}
-                        itemId={todo.itemId}
-                      />
-                    ))}
+                    {todos
+                      .filter((todo) => !todo.isCompleted)
+                      .map((todo) => (
+                        <CheckList
+                          key={todo.id}
+                          iconSize={32}
+                          isChecked={todo.isCompleted}
+                          onChange={() => handleToggleTodo(todo.id)} // 토글 처리
+                          text={todo.name}
+                          itemId={todo.id}
+                          tenantId={tenantId} // tenantId 전달
+                        />
+                      ))}
                   </ul>
                 )}
               </div>
@@ -108,7 +181,7 @@ export default function TodoContainer() {
             <div className="flex flex-col">
               <Image src="/images/done.svg" alt="Done" width={97} height={36} />
               <div className="flex flex-col items-center text-center">
-                {completedTodos.length === 0 ? (
+                {todos.filter((todo) => todo.isCompleted).length === 0 ? (
                   <>
                     <div className="relative mt-16 w-[120px] h-[120px] mobile:w-[240px] mobile:h-[240px]">
                       <Image
@@ -127,16 +200,19 @@ export default function TodoContainer() {
                   </>
                 ) : (
                   <ul className="flex flex-col gap-4 mt-4 justify-start w-full">
-                    {completedTodos.map((todo, index) => (
-                      <CheckList
-                        key={index}
-                        iconSize={32}
-                        isChecked={todo.isChecked}
-                        onChange={() => handleToggleCompletedTodo(index)}
-                        text={todo.text}
-                        itemId={todo.itemId}
-                      />
-                    ))}
+                    {todos
+                      .filter((todo) => todo.isCompleted)
+                      .map((todo) => (
+                        <CheckList
+                          key={todo.id}
+                          iconSize={32}
+                          isChecked={todo.isCompleted}
+                          onChange={() => handleToggleTodo(todo.id)} // 토글 처리
+                          text={todo.name}
+                          itemId={todo.id}
+                          tenantId={tenantId} // tenantId 전달
+                        />
+                      ))}
                   </ul>
                 )}
               </div>

@@ -13,8 +13,8 @@ const config: Config = {
         nanum: ["var(--font-nanumSquare)", "sans-serif"],
       },
       screens: {
-        "mobile": "375px",
-        "tablet": "744px",
+        "mobile": "376px",
+        "tablet": "745px",
         "desktop": "1920px"
       },
       backgroundImage: {
