@@ -2,7 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --tw-scrollbar-thumb: theme('colors.amber.200');
+}
+
 @layer utilities {
+  /* 스크롤 스타일 */
+  *::-webkit-scrollbar {
+    width: 5px; /* 스크롤바 너비를 얇게 설정 */
+  }
+  
+  *::-webkit-scrollbar-thumb {
+    background-color: var(--tw-scrollbar-thumb);
+    border-radius: 3px;
+    border: none;
+  }
+
+  /* 폰트 스타일 */
   .text-2xl {
     font-family: var(--font-nanumSquare), sans-serif;
     font-size: 20px;

@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import CheckListDetail from "@/components/CheckListDetail";
 import Delete from "@/components/Delete";
 import DetailPlus from "@/components/DetailPlus";
 import EditButton from "@/components/EditButton";
+import { useRouter } from "next/navigation";
 
 interface TodoDetailContainerProps {
   text: string;
@@ -15,15 +16,20 @@ interface TodoDetailContainerProps {
 }
 
 export default function TodoDetailContainer({
-  text,
+  text: initialText,
   isChecked: initialChecked,
   itemId,
   tenantId,
 }: TodoDetailContainerProps) {
+  const router = useRouter(); // useRouter 훅을 사용하여 페이지 이동
   const [isChecked, setIsChecked] = useState(initialChecked);
   const [isEditActive, setIsEditActive] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null); // 이미지 상태 관리
   const [memo, setMemo] = useState("");
+  const [text, setText] = useState(initialText); // 텍스트 상태 추가
+
+  //테스트 시작
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     // 초기 메모를 불러오는 API 호출
@@ -36,11 +42,31 @@ export default function TodoDetailContainer({
       .then((data) => {
         setMemo(data.memo || ""); // 초기 메모 값을 설정
         setImageUrl(data.imageUrl || null); // 초기 이미지 값을 설정
+        setIsChecked(data.isCompleted || false); // 초기 isChecked 값을 설정
+        setText(data.name || ""); // 초기 텍스트 값 설정
+
+        console.log("Fetched isCompleted:", data.isCompleted);
       })
       .catch((error) => {
         console.error("메모를 불러오는 중 오류 발생:", error);
       });
   }, [tenantId, itemId]);
+
+  useEffect(() => {
+    // 내용에 따라 textarea 높이 자동 조정
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto"; // 기존 높이를 초기화
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`; // 내용에 맞춰 높이 조정
+    }
+  }, [memo]);
+
+  // 텍스트 변경 시 처리
+  const handleTextChange = (newText: string) => {
+    // setText(e.target.value);
+    setText(newText);
+
+    setIsEditActive(true); // 텍스트가 변경되면 수정 완료 버튼 활성화
+  };
 
   // 메모 내용 변경 시 버튼 활성화
   const handleMemoChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -63,8 +89,15 @@ export default function TodoDetailContainer({
 
   // 수정 완료 버튼 클릭 시 API로 변경된 내용 전송
   const handleSave = () => {
-    const updateData: { name?: string; memo?: string; imageUrl?: string } = {};
+    const updateData: {
+      name?: string;
+      memo?: string;
+      imageUrl?: string;
+      isCompleted?: boolean;
+    } = {};
     // 업데이트할 필드가 있는 경우에만 추가합니다.
+    if (text) updateData.name = text; // 텍스트 업데이트
+
     if (memo) updateData.memo = memo;
     if (imageUrl) updateData.imageUrl = imageUrl;
     fetch(
@@ -90,9 +123,11 @@ export default function TodoDetailContainer({
       })
       .then((data) => {
         console.log("업데이트 성공:", data);
+        setText(data.name || ""); // 업데이트된 텍스트 반영
         setMemo(data.memo || ""); // 업데이트된 메모를 textarea에 반영
         setImageUrl(data.imageUrl || null); // 업데이트된 이미지를 상태에 반영
         setIsEditActive(false); // 수정 완료 후 버튼 비활성화
+        router.push("/");
       })
       .catch((error) => {
         console.error("업데이트 중 오류 발생:", error);
@@ -131,6 +166,33 @@ export default function TodoDetailContainer({
       });
   };
 
+  // 삭제 버튼 클릭 시 API로 항목 삭제 요청
+  const handleDelete = () => {
+    fetch(
+      `https://assignment-todolist-api.vercel.app/api/${encodeURIComponent(
+        tenantId
+      )}/items/${itemId}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    )
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("삭제 실패");
+        }
+        return response.json();
+      })
+      .then(() => {
+        console.log("삭제 성공");
+        router.push("/"); // 삭제 성공 시 메인 페이지로 리다이렉트
+      })
+      .catch((error) => {
+        console.error("삭제 중 오류 발생:", error);
+      });
+  };
 
   return (
     <>
@@ -141,6 +203,7 @@ export default function TodoDetailContainer({
               isChecked={isChecked}
               onChange={handleToggleChecked}
               text={text}
+              onTextChange={handleTextChange}
             />
           </div>
 
@@ -157,8 +220,6 @@ export default function TodoDetailContainer({
               ) : (
                 <Image src="/images/img.svg" alt="img" width={64} height={64} />
               )}
-              {/* <div className="relative w-full tablet:w-[384px] h-[311px] rounded-3xl border-2 border-dashed border-slate-300 bg-slate-50 flex justify-center items-center overflow-hidden"> */}
-              {/* <Image src="/images/img.svg" alt="img" width={64} height={64} /> */}
               <div className="absolute bottom-4 right-4">
                 <input
                   type="file"
@@ -172,15 +233,33 @@ export default function TodoDetailContainer({
 
             {/* 메모 입력칸 */}
             <div
-              className="relative w-full tablet:w-[588px] h-[311px] rounded-3xl p-4 bg-cover bg-center overflow-hidden flex flex-col justify-center items-center"
+              className="relative w-full tablet:w-[588px] rounded-3xl p-4 bg-cover bg-center flex flex-col justify-center items-center"
               style={{ backgroundImage: "url('/images/memo.svg')" }}
             >
-              <p className="text-lg text-amber-800 text-center mt-2">Memo</p>
+              {/* <p className="text-lg text-amber-800 text-center my- ">Memo</p> */}
+              <p
+                className="text-lg text-amber-800 text-center absolute"
+                style={{
+                  width: "48px",
+                  height: "18px",
+                  top: "24px",
+                  left: "270px",
+                  gap: "0px",
+                }}
+              >
+                Memo
+              </p>
               <textarea
+                ref={textareaRef}
                 value={memo}
                 onChange={handleMemoChange}
-                className="w-full h-[229px] p-2 border-slate-300 rounded-lg resize-none bg-transparent"
+                className="w-full p-2 mt-14 border-slate-300 rounded-lg resize-none bg-transparent text-sm text-slate-800 text-center"
                 placeholder="메모를 입력해주세요"
+                style={{
+                  height: "auto",
+                  minHeight: "100px", // 최소 높이 설정
+                  maxHeight: "220px", // 최대 높이 설정
+                }}
               />
             </div>
           </div>
@@ -188,7 +267,7 @@ export default function TodoDetailContainer({
           {/* 삭제 및 수정 버튼 */}
           <div className="flex justify-center tablet:justify-end gap-4 mt-10 tablet:mt-6 w-full tablet:max-w-[996px] mx-auto">
             <EditButton isActive={isEditActive} onClick={handleSave} />
-            <Delete />
+            <Delete onClick={handleDelete} />
           </div>
         </div>
       </div>
