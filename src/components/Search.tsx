@@ -6,14 +6,11 @@ interface SearchProps {
 
 export default function Search({
   onSubmit,
-  placeholder = "할 일을 입력해주세요", // 기본 입력 텍스트
+  placeholder = "할 일을 입력해주세요",
   value,
 }: SearchProps) {
-  // const [inputValue, setInputValue] = useState<string>("");
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (onSubmit) {
-      // onSubmit 함수가 존재하는지 확인
       onSubmit(e.target.value);
     }
   };

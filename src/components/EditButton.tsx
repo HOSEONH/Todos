@@ -2,7 +2,7 @@ import CheckIcon from "@/assets/icons/check.svg";
 
 interface EditButtonProps {
   iconSize?: number;
-  isActive: boolean; // 활성/비활성 상태를 결정하는 prop
+  isActive: boolean;
   onClick?: () => void;
   type?: "button" | "submit";
 }

@@ -13,6 +13,16 @@ const nextConfig = {
     });
     return config;
   },
+  // 이미지 호스트네임 설정
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'sprint-fe-project.s3.ap-northeast-2.amazonaws.com',
+        pathname: '/**',
+      },
+    ],
+  },
 };
 
 export default nextConfig;

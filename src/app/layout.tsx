@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "@/styles/globals.css";
-import localFont from 'next/font/local'
+import localFont from "next/font/local";
 import Header from "@/components/Header";
 
 // NanumSquare 폰트 설정
@@ -23,7 +23,7 @@ export const nanumSquare = localFont({
     },
   ],
   display: "swap",
-  variable: "--font-nanumSquare", 
+  variable: "--font-nanumSquare",
 });
 
 export const metadata: Metadata = {
@@ -39,10 +39,15 @@ export default function RootLayout({
   return (
     <html lang="ko" className={`${nanumSquare.variable}`}>
       <head>
-      <link rel="icon" href="/images/favicon.svg" type="image/svg+xml" />
+        {/* 로고 favicon 설정 */}
+        <link rel="icon" href="/images/favicon.svg" type="image/svg+xml" />
       </head>
-      <body className={`${nanumSquare.className} mx-auto overflow-hidden bg-gray-50`}>
+      <body
+        className={`${nanumSquare.className} mx-auto overflow-hidden bg-gray-50`}
+      >
+        {/* 페이지 상단에 위치할 Header 컴포넌트 */}
         <Header />
+        {/* 자식 컴포넌트 렌더링 */}
         {children}
       </body>
     </html>

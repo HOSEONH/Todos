@@ -50,7 +50,11 @@ export default function AddLargeDefault({
           border-2
           border-slate-900"
       >
-        <PlusIcon width={iconSize} height={iconSize} className="text-slate-900" />
+        <PlusIcon
+          width={iconSize}
+          height={iconSize}
+          className="text-slate-900"
+        />
 
         {/* 큰 화면에서는 텍스트 보이게, 작은 화면에서는 숨김 */}
         <span className="text-slate-900 text-base hidden mobile:inline">

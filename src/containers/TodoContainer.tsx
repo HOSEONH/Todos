@@ -8,19 +8,18 @@ import CheckList from "@/components/CheckList";
 
 interface Todo {
   id: number; // 항목의 고유 ID (서버에서 생성된 ID)
-  name: string; // 할 일의 이름
-  isCompleted: boolean; // 완료 여부
+  name: string;
+  isCompleted: boolean;
 }
 
 interface TodoContainerProps {
-  tenantId: string; // Home 컴포넌트에서 전달받는 tenantId
+  tenantId: string;
 }
 
 export default function TodoContainer({ tenantId }: TodoContainerProps) {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [inputValue, setInputValue] = useState<string>("");
 
-  // 할 일 목록을 서버에서 가져옴
   useEffect(() => {
     console.log("Fetching todos for tenantId:", tenantId);
     fetch(
@@ -34,22 +33,21 @@ export default function TodoContainer({ tenantId }: TodoContainerProps) {
       })
       .then((data) => {
         console.log("API Response data:", data);
-        setTodos(data); 
+        setTodos(data);
       })
       .catch((error) => {
         console.error("API Error:", error);
       });
   }, [tenantId]);
 
-  // 새로운 할 일 항목을 추가
+  // 새로운 할 일 항목 추가
   const handleAddTodo = () => {
     if (inputValue.trim() !== "") {
       const newTodo = {
-        name: inputValue.trim(), // 'name' 필드에 입력된 할 일 텍스트를 전달
+        name: inputValue.trim(),
       };
       console.log("Adding new todo:", newTodo);
 
-      // API를 통해 새로운 할 일 항목 추가
       fetch(
         `https://assignment-todolist-api.vercel.app/api/${encodeURIComponent(
           tenantId
@@ -62,14 +60,12 @@ export default function TodoContainer({ tenantId }: TodoContainerProps) {
           body: JSON.stringify(newTodo),
         }
       )
-        .then((response) =>
-          response.json()
-        )
+        .then((response) => response.json())
 
         .then((data) => {
           console.log("Todo added successfully:", data);
-          setTodos([...todos, data]); // 서버에서 받은 새 투두 데이터를 추가
-          setInputValue(""); // 입력 필드 초기화
+          setTodos([...todos, data]);
+          setInputValue("");
         })
         .catch((error) => {
           console.error("Failed to add todo:", error.message);
@@ -77,19 +73,19 @@ export default function TodoContainer({ tenantId }: TodoContainerProps) {
     }
   };
 
-  // 할 일 항목의 상태를 토글
+  /** 할 일 항목 토긍 */
   const handleToggleTodo = (id: number) => {
     const todoIndex = todos.findIndex((todo) => todo.id === id);
     if (todoIndex !== -1) {
       const updatedTodo = {
-        isCompleted: !todos[todoIndex].isCompleted, // 상태 토글
+        isCompleted: !todos[todoIndex].isCompleted,
       };
       console.log("Toggling todo:", updatedTodo);
 
       const requestUrl = `https://assignment-todolist-api.vercel.app/api/${encodeURIComponent(
         tenantId
       )}/items/${id}`;
-      console.log("PATCH request to:", requestUrl); // 요청 URL 확인
+      console.log("PATCH request to:", requestUrl);
 
       fetch(requestUrl, {
         method: "PATCH",
@@ -111,7 +107,7 @@ export default function TodoContainer({ tenantId }: TodoContainerProps) {
             ...todos[todoIndex],
             isCompleted: updatedTodo.isCompleted,
           };
-          setTodos(updatedTodos); // 상태 업데이트
+          setTodos(updatedTodos);
         })
         .catch((error) => {
           console.error("Failed to toggle todo:", error.message);
@@ -207,10 +203,10 @@ export default function TodoContainer({ tenantId }: TodoContainerProps) {
                           key={todo.id}
                           iconSize={32}
                           isChecked={todo.isCompleted}
-                          onChange={() => handleToggleTodo(todo.id)} // 토글 처리
+                          onChange={() => handleToggleTodo(todo.id)}
                           text={todo.name}
                           itemId={todo.id}
-                          tenantId={tenantId} // tenantId 전달
+                          tenantId={tenantId}
                         />
                       ))}
                   </ul>

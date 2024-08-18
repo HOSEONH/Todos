@@ -6,8 +6,8 @@ interface CheckListDetailProps {
   iconSize?: number;
   isChecked: boolean;
   onChange: (checked: boolean) => void;
-  text: string; // 투두 항목의 텍스트를 받을 prop 추가
-  onTextChange: (newText: string) => void; // 텍스트 변경을 처리할 함수
+  text: string;
+  onTextChange: (newText: string) => void;
 
   type?: "button" | "submit" | "checkbox";
   isDisabled?: boolean;
@@ -25,8 +25,10 @@ export default function CheckListDetail({
   const [inputWidth, setInputWidth] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  /**
+   * 텍스트의 실제 길이에 따라 input의 너비를 조정하는 함수
+   */
   useEffect(() => {
-    // 텍스트의 실제 길이에 따라 input의 너비를 조정하는 함수
     const calculateWidth = () => {
       if (inputRef.current) {
         const canvas = document.createElement("canvas");
@@ -61,7 +63,7 @@ export default function CheckListDetail({
           rounded-3xl border-2 border-slate-900 mx-auto px-4
           ${isChecked ? "bg-violet-100" : "bg-white"}`}
     >
-      <div className="flex items-center justify-center w-full space-x-4">
+      <div className="flex items-center justify-center w-full space-x-2">
         <label className="cursor-pointer">
           <input
             type={type}
@@ -70,15 +72,15 @@ export default function CheckListDetail({
             checked={isChecked}
             onChange={handleCheckboxClick}
           />
-          {/* 체크 여부에 따라 아이콘을 변경 */}
+          {/* 체크 여부에 따라 변경 */}
           {isChecked ? (
             <CheckboxCheckedIcon width={iconSize} height={iconSize} />
           ) : (
             <CheckboxDefaultIcon width={iconSize} height={iconSize} />
           )}
         </label>
-        {/* 텍스트 수정 가능하도록 input 필드 추가 */}
 
+        {/* 텍스트 수정 input */}
         <input
           ref={inputRef}
           type="text"

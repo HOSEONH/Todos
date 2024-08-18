@@ -1,6 +1,3 @@
-// 1. 체크박스: 상태를 토글
-// 2. 라벨(텍스트): 해당 할 일의 디테일 페이지로 이동
-
 import Link from "next/link";
 import CheckboxCheckedIcon from "@/assets/icons/checkbox/checked.svg"; // 체크된 상태의 아이콘
 import CheckboxDefaultIcon from "@/assets/icons/checkbox/default.svg"; // 체크되지 않은 상태의 아이콘
@@ -15,7 +12,6 @@ interface CheckListProps {
   text: string;
   itemId: number;
   tenantId: string;
-
 }
 
 export default function CheckList({
@@ -31,7 +27,7 @@ export default function CheckList({
   const router = useRouter();
 
   const handleCheckboxClick = () => {
-    onChange(); // 부모 컴포넌트에 상태 변경 알림
+    onChange();
   };
 
   return (
@@ -48,7 +44,7 @@ export default function CheckList({
           checked={isChecked}
           onChange={handleCheckboxClick}
         />
-        {/* 체크 여부에 따라 아이콘을 변경 */}
+        {/* 체크 여부에 따라 변경 */}
         {isChecked ? (
           <CheckboxCheckedIcon width={iconSize} height={iconSize} />
         ) : (
