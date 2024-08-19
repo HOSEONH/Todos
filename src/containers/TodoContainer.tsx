@@ -23,7 +23,7 @@ export default function TodoContainer({ tenantId }: TodoContainerProps) {
   useEffect(() => {
     console.log("Fetching todos for tenantId:", tenantId);
     fetch(
-      `https://assignment-todolist-api.vercel.app/api/${encodeURIComponent(
+      `${process.env.NEXT_PUBLIC_API_URL}/${encodeURIComponent(
         tenantId
       )}/items`
     )
@@ -49,7 +49,7 @@ export default function TodoContainer({ tenantId }: TodoContainerProps) {
       console.log("Adding new todo:", newTodo);
 
       fetch(
-        `https://assignment-todolist-api.vercel.app/api/${encodeURIComponent(
+        `${process.env.NEXT_PUBLIC_API_URL}/${encodeURIComponent(
           tenantId
         )}/items`,
         {
@@ -82,7 +82,7 @@ export default function TodoContainer({ tenantId }: TodoContainerProps) {
       };
       console.log("Toggling todo:", updatedTodo);
 
-      const requestUrl = `https://assignment-todolist-api.vercel.app/api/${encodeURIComponent(
+      const requestUrl = `${process.env.NEXT_PUBLIC_API_URL}/${encodeURIComponent(
         tenantId
       )}/items/${id}`;
       console.log("PATCH request to:", requestUrl);

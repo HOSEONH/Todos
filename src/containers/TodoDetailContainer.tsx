@@ -43,7 +43,7 @@ export default function TodoDetailContainer({
    */
   useEffect(() => {
     fetch(
-      `https://assignment-todolist-api.vercel.app/api/${encodeURIComponent(
+      `${process.env.NEXT_PUBLIC_API_URL}/${encodeURIComponent(
         tenantId
       )}/items/${itemId}`
     )
@@ -105,7 +105,7 @@ export default function TodoDetailContainer({
 
       try {
         const response = await fetch(
-          `https://assignment-todolist-api.vercel.app/api/${encodeURIComponent(
+          `${process.env.NEXT_PUBLIC_API_URL}/${encodeURIComponent(
             tenantId
           )}/images/upload`,
           {
@@ -159,7 +159,7 @@ export default function TodoDetailContainer({
     if (imageUrl) updateData.imageUrl = imageUrl;
 
     fetch(
-      `https://assignment-todolist-api.vercel.app/api/${encodeURIComponent(
+      `${process.env.NEXT_PUBLIC_API_URL}/${encodeURIComponent(
         tenantId
       )}/items/${itemId}`,
       {
@@ -200,7 +200,7 @@ export default function TodoDetailContainer({
     setIsChecked(newChecked);
 
     fetch(
-      `https://assignment-todolist-api.vercel.app/api/${encodeURIComponent(
+      `${process.env.NEXT_PUBLIC_API_URL}/${encodeURIComponent(
         tenantId
       )}/items/${itemId}`,
       {
@@ -231,7 +231,7 @@ export default function TodoDetailContainer({
    */
   const handleDelete = () => {
     fetch(
-      `https://assignment-todolist-api.vercel.app/api/${encodeURIComponent(
+      `${process.env.NEXT_PUBLIC_API_URL}/${encodeURIComponent(
         tenantId
       )}/items/${itemId}`,
       {

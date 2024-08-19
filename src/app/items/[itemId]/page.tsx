@@ -9,7 +9,7 @@ import TodoDetailContainer from "@/containers/TodoDetailContainer";
  */
 async function fetchTodoData(tenantId: string, itemId: string) {
   const res = await fetch(
-    `https://assignment-todolist-api.vercel.app/api/${encodeURIComponent(
+    `${process.env.NEXT_PUBLIC_API_URL}/${encodeURIComponent(
       tenantId
     )}/items/${itemId}`
   );
